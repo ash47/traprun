@@ -1,50 +1,41 @@
 include("shared.lua")
 
 function ENT:Initialize()
-    self.mesh = Mesh()
-    self.mesh:BuildFromTriangles(self.MeshTable)
+    -- Grab the mesh
+    local meshTable = self:BuildMesh()
 
-    self:SetRenderBounds(Vector(-10000,-10000,-10000), Vector(10000, 10000, 10000))
+    -- Create a drawable version of the mesh
+    self.mesh = Mesh()
+    self.mesh:BuildFromTriangles(meshTable)
+
+    self:SetRenderBounds(Vector(0,0,0), Vector(self.width, self.length, self.height))
+
+    -- Init collisions
+    self:PhysicsInit(SOLID_CUSTOM)
+    self:PhysicsFromMesh(meshTable, true)
+    self:EnableCustomCollisions(true)
+    self:SetSolid(SOLID_VPHYSICS)
+
+    -- Stop it from moving
+    self:GetPhysicsObject():EnableMotion(false)
+    self:SetMoveType(MOVETYPE_NONE)
+
+    -- Build draw matrix
+    self.matrix = Matrix();
+    matrix:Translate(self:GetPos());
+    matrix:Rotate(self:GetAngles());
 end
 
-MeshMaterial = Material("staircase/tester1")
+local meshMaterial = Material("staircase/tester1")
 
 function ENT:Draw( )
+    local matrix = Matrix();
+    matrix:Translate(self:GetPos());
+    matrix:Rotate(self:GetAngles());
 
-    --self:DrawModel( );
+    render.SetMaterial(meshMaterial);
 
-    render.SetMaterial( MeshMaterial );
-
-    local matrix = Matrix( );
-    matrix:Translate( self:GetPos( ) );
-    matrix:Rotate( self:GetAngles( ) );
-    --matrix:Scale( Vector( 1, 1, 1 ) );
-
-    local up = Vector( 0, 0, 1 );
-    local right = Vector( 1, 0, 0 );
-    local forward = Vector( 0, 1, 0 );
-
-    local down = up * -1;
-    local left = right * -1;
-    local backward = forward * -1;
-
-    cam.PushModelMatrix( matrix );
-
-        --[[mesh.Begin( MATERIAL_QUADS, 6 );
-
-        mesh.QuadEasy( up / 2, up, 1, 1 );
-        mesh.QuadEasy( down / 2, down, 1, 1 );
-
-        mesh.QuadEasy( left / 2, left, 1, 1 );
-        mesh.QuadEasy( right / 2, right, 1, 1 );
-
-        mesh.QuadEasy( forward / 2, forward, 1, 1 );
-        mesh.QuadEasy( backward / 2, backward, 1, 1 );
-
-        mesh.End( );]]--
-
+    cam.PushModelMatrix(matrix);
         self.mesh:Draw()
-
-    cam.PopModelMatrix( );
-
+    cam.PopModelMatrix();
 end

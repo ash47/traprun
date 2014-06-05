@@ -1,5 +1,6 @@
 -- Client Shit (for reloading perposes)
 include("cl_init.lua")
 
--- Shared Files
-include("shared.lua")
+-- Includes
+include("shared.lua")   -- Shared stuff
+include("sv_map.lua")   -- Map generation stuff
