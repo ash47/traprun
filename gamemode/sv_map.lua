@@ -8,9 +8,15 @@ function GM:InitPostEntity()
     -- Spawn long corridor
     for i=0,15 do
         for j=0,15 do
-            local test = ents.Create("base_trap")
-            test:SetPos(refPos:GetPos()+Vector(64*4*j, 64*4*i, 0))
-            test:Spawn()
+            if i == 0 and j == 0 then
+                local test = ents.Create("trap_start")
+                test:SetPos(refPos:GetPos()+Vector(64*4*j, 64*4*i, 0))
+                test:Spawn()
+            else
+                local test = ents.Create("trap_hole")
+                test:SetPos(refPos:GetPos()+Vector(64*4*j, 64*4*i, 0))
+                test:Spawn()
+            end
         end
     end
 end

@@ -4,9 +4,12 @@ include("shared.lua")
 include("cl_init.lua")
 
 function ENT:Initialize()
+    -- Build the mesh
+    self:BuildMesh()
+
     -- Init collisions
     self:PhysicsInit(SOLID_CUSTOM)
-    self:PhysicsFromMesh(self:BuildMesh(), true)
+    self:PhysicsFromMesh(self.meshTable, true)
     self:EnableCustomCollisions(true)
     self:SetSolid(SOLID_VPHYSICS)
 
