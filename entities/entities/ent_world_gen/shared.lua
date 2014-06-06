@@ -74,8 +74,6 @@ function ENT:BuildMap()
             -- Create the meshes
             self.renderMeshes[k] = Mesh()
             self.renderMeshes[k]:BuildFromTriangles(v)
-
-            PrintTable(v)
         end
     end
 
