@@ -57,9 +57,6 @@ function SetMapCell(x, y, rot, trapId)
     if not ValidRot(rot) then return false end
     if not ValidCell(x, y) then return false end
 
-    -- Ensure the parented cells fit
-    print("Stored trap into cell "..x..", "..y..", type = "..trapId)
-
     -- Put the trap into the cell
     map[x][y] = {
         taken = true,
@@ -138,17 +135,17 @@ function Vertex(pos, u, v, normal)
 end
 
 -- Creates a plane
-function Plane(top_left, top_right, bottom_right, bottom_left)
+function Plane(top_left, top_right, bottom_right, bottom_left, normal)
     -- Fix tex coords
 
     return {
-        Vertex(bottom_right, 1, 0),
-        Vertex(top_right, 1, 1),
-        Vertex(bottom_left, 0, 0),
+        Vertex(bottom_right, 1, 0, normal),
+        Vertex(top_right, 1, 1, normal),
+        Vertex(bottom_left, 0, 0, normal),
 
-        Vertex(top_right, 1, 1),
-        Vertex(top_left, 0, 1),
-        Vertex(bottom_left, 0, 0)
+        Vertex(top_right, 1, 1, normal),
+        Vertex(top_left, 0, 1, normal),
+        Vertex(bottom_left, 0, 0, normal)
     }
 end
 
@@ -164,21 +161,54 @@ local test = RegisterTrap({
     mesh = {
         floor = {
             -- Floor
-            Plane(Vector(ts*4, ts*4, 0), Vector(0, ts*4, 0), Vector(0, 0, 0), Vector(ts*4, 0, 0))
+            Plane(Vector(ts*4, ts*4, 0), Vector(0, ts*4, 0), Vector(0, 0, 0), Vector(ts*4, 0, 0), Vector(0, 0, 1), vector_up)
         },
         roof = {
             -- Roof
-            Plane(Vector(0, 0, ts*4), Vector(0, ts*4, ts*4), Vector(ts*4, ts*4, ts*4), Vector(ts*4, 0, ts*4))
+            Plane(Vector(0, 0, ts*4), Vector(0, ts*4, ts*4), Vector(ts*4, ts*4, ts*4), Vector(ts*4, 0, ts*4), Vector(0, 0, -1), Vector(0, 0, 1))
         },
         wall = {
             -- Left
-            Plane(Vector(0, ts*4, 0), Vector(0, ts*4, ts*4), Vector(0, 0, ts*4), Vector(0, 0, 0)),
+            Plane(Vector(0, ts*4, 0), Vector(0, ts*4, ts*4), Vector(0, 0, ts*4), Vector(0, 0, 0), Vector(1, 0, 0)),
 
             -- Right
-            Plane(Vector(ts*4, ts*4, 0), Vector(ts*4, 0, 0), Vector(ts*4, 0, ts*4), Vector(ts*4, ts*4, ts*4)),
+            Plane(Vector(ts*4, ts*4, 0), Vector(ts*4, 0, 0), Vector(ts*4, 0, ts*4), Vector(ts*4, ts*4, ts*4), Vector(-1, 0, 0)),
 
             -- Back
-            Plane(Vector(0, 0, 0), Vector(0, 0, ts*4), Vector(ts*4, 0, ts*4), Vector(ts*4, 0, 0))
+            Plane(Vector(0, 0, 0), Vector(0, 0, ts*4), Vector(ts*4, 0, ts*4), Vector(ts*4, 0, 0), Vector(0, 1, 0))
+        },
+    }
+})
+
+-- Basic Gap
+local test2 = RegisterTrap({
+    name = "Basic Gap",
+    xSize = 4,
+    ySize = 4,
+    conUp = true,
+    conDown = true,
+    mesh = {
+        floor = {
+            -- Floor
+            Plane(Vector(ts*4, ts, 0), Vector(0, ts, 0), Vector(0, 0, 0), Vector(ts*4, 0, 0), vector_up),
+            Plane(Vector(ts*4, ts*4, 0), Vector(0, ts*4, 0), Vector(0, ts*3, 0), Vector(ts*4, ts*3, 0), vector_up)
+        },
+        roof = {
+            -- Roof
+            Plane(Vector(0, 0, ts*4), Vector(0, ts*4, ts*4), Vector(ts*4, ts*4, ts*4), Vector(ts*4, 0, ts*4), Vector(0, 0, -1))
+        },
+        wall = {
+            -- Left
+            Plane(Vector(0, ts*4, -ts*4), Vector(0, ts*4, ts*4), Vector(0, 0, ts*4), Vector(0, 0, -ts*4), Vector(1, 0, 0)),
+
+            -- Right
+            Plane(Vector(ts*4, ts*4, -ts*4), Vector(ts*4, 0, -ts*4), Vector(ts*4, 0, ts*4), Vector(ts*4, ts*4, ts*4), Vector(-1, 0, 0)),
+
+            -- Front Hole
+            Plane(Vector(0, ts*3, 0), Vector(0, ts*3, -ts*4), Vector(ts*4, ts*3, -ts*4), Vector(ts*4, ts*3, 0), Vector(0, -1, 0)),
+
+            -- Back Hole
+            Plane(Vector(0, ts, 0), Vector(ts*4, ts, 0), Vector(ts*4, ts, -ts*4), Vector(0, ts, -ts*4), Vector(0, 1, 0))
         },
     }
 })
@@ -186,6 +216,10 @@ local test = RegisterTrap({
 -- Stick the start in (debug)
 for i=0, 15 do
     for j=0, 15 do
-        SetMapCell(1+j*4, 1+i*4, 0, test)
+        if i == 0 and j == 0 then
+            SetMapCell(1+j*4, 1+i*4, 0, test)
+        else
+            SetMapCell(1+j*4, 1+i*4, 0, test2)
+        end
     end
 end

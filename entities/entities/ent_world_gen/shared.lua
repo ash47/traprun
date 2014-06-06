@@ -16,13 +16,10 @@ function ENT:BuildMap()
             -- Grab a cell
             local cell = GetMapCell(xx, yy)
             if cell then
-                print("Found a cell!")
                 -- Check if it has a trap in it
                 if cell.trapId ~= nil then
                     -- Grab this trap
                     local trap = GetTrap(cell.trapId)
-
-                    print("Found a trap!")
 
                     -- Check if it has a mesh
                     if trap and trap.mesh then
@@ -30,8 +27,6 @@ function ENT:BuildMap()
                         for k,v in pairs(trap.mesh) do
                             -- Workout the offsets
                             local o = Vector((xx-1)*tileSize, (yy-1)*tileSize, 0)
-
-                            print(o)
 
                             -- Build rendereable mesh
                             if CLIENT then
@@ -50,7 +45,6 @@ function ENT:BuildMap()
                                         -- Add to our mesh
                                         table.insert(renderMeshes[k], vert)
                                     end
-                                    --table.Add(renderMeshes[k], vv)
                                 end
                             end
 
@@ -73,21 +67,17 @@ function ENT:BuildMap()
 
     -- Build the renderable meshes
     if CLIENT then
-        print("Here come the meshes:")
         -- Reset our rendereables
         self.renderMeshes = {}
 
         for k,v in pairs(renderMeshes) do
-            print(k)
-            PrintTable(v)
             -- Create the meshes
             self.renderMeshes[k] = Mesh()
             self.renderMeshes[k]:BuildFromTriangles(v)
+
+            PrintTable(v)
         end
     end
-
-    print("Physics:")
-    PrintTable(self.physicsMesh)
 
     -- Init collisions
     self:PhysicsInit(SOLID_CUSTOM)

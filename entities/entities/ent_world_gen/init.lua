@@ -4,6 +4,9 @@ include("shared.lua")
 include("cl_init.lua")
 
 function ENT:Initialize()
+    -- Set our model (needed to render mesh)
+    self:SetModel("models/Gibs/HGIBS.mdl")
+
     -- Build the map
     self:BuildMap()
 end
