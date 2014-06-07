@@ -139,13 +139,13 @@ function Plane(top_left, top_right, bottom_right, bottom_left, normal)
     -- Fix tex coords
 
     return {
-        Vertex(bottom_right, 1, 0, normal),
-        Vertex(top_right, 1, 1, normal),
-        Vertex(bottom_left, 0, 0, normal),
+        Vertex(bottom_right[1], bottom_right[2], bottom_right[3], normal),
+        Vertex(top_right[1], top_right[2], top_right[3], normal),
+        Vertex(bottom_left[1], bottom_left[2], bottom_left[3], normal),
 
-        Vertex(top_right, 1, 1, normal),
-        Vertex(top_left, 0, 1, normal),
-        Vertex(bottom_left, 0, 0, normal)
+        Vertex(top_right[1], top_right[2], top_right[3], normal),
+        Vertex(top_left[1], top_left[2], top_left[3], normal),
+        Vertex(bottom_left[1], bottom_left[2], bottom_left[3], normal)
     }
 end
 
@@ -161,21 +161,21 @@ local test = RegisterTrap({
     mesh = {
         floor = {
             -- Floor
-            Plane(Vector(ts*4, ts*4, 0), Vector(0, ts*4, 0), Vector(0, 0, 0), Vector(ts*4, 0, 0), Vector(0, 0, 1), vector_up)
+            Plane({Vector(ts*4, ts*4, 0), 4, 4}, {Vector(0, ts*4, 0), 0, 4}, {Vector(0, 0, 0), 0, 0}, {Vector(ts*4, 0, 0), 4, 0}, Vector(0, 0, 1))
         },
         roof = {
             -- Roof
-            Plane(Vector(0, 0, ts*4), Vector(0, ts*4, ts*4), Vector(ts*4, ts*4, ts*4), Vector(ts*4, 0, ts*4), Vector(0, 0, -1), Vector(0, 0, 1))
+            Plane({Vector(0, 0, ts*4), 0, 0}, {Vector(0, ts*4, ts*4), 0, 4}, {Vector(ts*4, ts*4, ts*4), 4, 4}, {Vector(ts*4, 0, ts*4), 4, 0}, Vector(0, 0, -1))
         },
         wall = {
             -- Left
-            Plane(Vector(0, ts*4, 0), Vector(0, ts*4, ts*4), Vector(0, 0, ts*4), Vector(0, 0, 0), Vector(1, 0, 0)),
+            Plane({Vector(0, ts*4, 0), 4, 0}, {Vector(0, ts*4, ts*4), 4, 4}, {Vector(0, 0, ts*4), 0, 4}, {Vector(0, 0, 0), 0, 0}, Vector(1, 0, 0)),
 
             -- Right
-            Plane(Vector(ts*4, ts*4, 0), Vector(ts*4, 0, 0), Vector(ts*4, 0, ts*4), Vector(ts*4, ts*4, ts*4), Vector(-1, 0, 0)),
+            Plane({Vector(ts*4, ts*4, 0), 4, 0}, {Vector(ts*4, 0, 0), 0, 0}, {Vector(ts*4, 0, ts*4), 0, 4}, {Vector(ts*4, ts*4, ts*4), 4, 4}, Vector(-1, 0, 0)),
 
             -- Back
-            Plane(Vector(0, 0, 0), Vector(0, 0, ts*4), Vector(ts*4, 0, ts*4), Vector(ts*4, 0, 0), Vector(0, 1, 0))
+            Plane({Vector(0, 0, 0), 0, 0}, {Vector(0, 0, ts*4), 0, 4}, {Vector(ts*4, 0, ts*4), 4, 4}, {Vector(ts*4, 0, 0), 4, 0}, Vector(0, 1, 0))
         },
     }
 })
@@ -190,25 +190,51 @@ local test2 = RegisterTrap({
     mesh = {
         floor = {
             -- Floor
-            Plane(Vector(ts*4, ts, 0), Vector(0, ts, 0), Vector(0, 0, 0), Vector(ts*4, 0, 0), vector_up),
-            Plane(Vector(ts*4, ts*4, 0), Vector(0, ts*4, 0), Vector(0, ts*3, 0), Vector(ts*4, ts*3, 0), vector_up)
+            Plane({Vector(ts*4, ts, 0), 4, 1}, {Vector(0, ts, 0), 0, 1}, {Vector(0, 0, 0), 0, 0}, {Vector(ts*4, 0, 0), 4, 0}, vector_up),
+            Plane({Vector(ts*4, ts*4, 0), 4, 4}, {Vector(0, ts*4, 0), 0, 4}, {Vector(0, ts*3, 0), 0, 3}, {Vector(ts*4, ts*3, 0), 4, 3}, vector_up)
         },
         roof = {
             -- Roof
-            Plane(Vector(0, 0, ts*4), Vector(0, ts*4, ts*4), Vector(ts*4, ts*4, ts*4), Vector(ts*4, 0, ts*4), Vector(0, 0, -1))
+            Plane({Vector(0, 0, ts*4), 0, 0}, {Vector(0, ts*4, ts*4), 0, 4}, {Vector(ts*4, ts*4, ts*4), 4, 4}, {Vector(ts*4, 0, ts*4), 4, 0}, Vector(0, 0, -1))
         },
         wall = {
             -- Left
-            Plane(Vector(0, ts*4, -ts*4), Vector(0, ts*4, ts*4), Vector(0, 0, ts*4), Vector(0, 0, -ts*4), Vector(1, 0, 0)),
+            Plane({Vector(0, ts*4, -ts*4), 4, -4}, {Vector(0, ts*4, ts*4), 4, 4}, {Vector(0, 0, ts*4), 0, 4}, {Vector(0, 0, -ts*4), 0, -4}, Vector(1, 0, 0)),
 
             -- Right
-            Plane(Vector(ts*4, ts*4, -ts*4), Vector(ts*4, 0, -ts*4), Vector(ts*4, 0, ts*4), Vector(ts*4, ts*4, ts*4), Vector(-1, 0, 0)),
+            Plane({Vector(ts*4, ts*4, -ts*4), 4, -4}, {Vector(ts*4, 0, -ts*4), 0, -4}, {Vector(ts*4, 0, ts*4), 0, 4}, {Vector(ts*4, ts*4, ts*4), 4, 4}, Vector(-1, 0, 0)),
 
             -- Front Hole
-            Plane(Vector(0, ts*3, 0), Vector(0, ts*3, -ts*4), Vector(ts*4, ts*3, -ts*4), Vector(ts*4, ts*3, 0), Vector(0, -1, 0)),
+            Plane({Vector(0, ts*3, 0), 0, 0}, {Vector(0, ts*3, -ts*4), 0, -4}, {Vector(ts*4, ts*3, -ts*4), 4, -4}, {Vector(ts*4, ts*3, 0), 4, 0}, Vector(0, -1, 0)),
 
             -- Back Hole
-            Plane(Vector(0, ts, 0), Vector(ts*4, ts, 0), Vector(ts*4, ts, -ts*4), Vector(0, ts, -ts*4), Vector(0, 1, 0))
+            Plane({Vector(0, ts, 0), 0, 0}, {Vector(ts*4, ts, 0), 4, 0}, {Vector(ts*4, ts, -ts*4), 4, -4}, {Vector(0, ts, -ts*4), 0, -4}, Vector(0, 1, 0))
+        },
+    }
+})
+
+-- Basic Corner
+local test3 = RegisterTrap({
+    name = "Basic Corner",
+    xSize = 4,
+    ySize = 4,
+    conDown = true,
+    conRight = true,
+    mesh = {
+        floor = {
+            -- Floor
+            Plane({Vector(ts*4, ts*4, 0), 4, 4}, {Vector(0, ts*4, 0), 0, 4}, {Vector(0, 0, 0), 0, 0}, {Vector(ts*4, 0, 0), 4, 0}, Vector(0, 0, 1))
+        },
+        roof = {
+            -- Roof
+            Plane({Vector(0, 0, ts*4), 0, 0}, {Vector(0, ts*4, ts*4), 0, 4}, {Vector(ts*4, ts*4, ts*4), 4, 4}, {Vector(ts*4, 0, ts*4), 4, 0}, Vector(0, 0, -1))
+        },
+        wall = {
+            -- Left
+            Plane({Vector(0, ts*4, 0), 4, 0}, {Vector(0, ts*4, ts*4), 4, 4}, {Vector(0, 0, ts*4), 0, 4}, {Vector(0, 0, 0), 0, 0}, Vector(1, 0, 0)),
+
+            -- Front
+            Plane({Vector(ts*4, ts*4, 0), 4, 0}, {Vector(ts*4, ts*4, ts*4), 4, 4}, {Vector(0, ts*4, ts*4), 0, 4}, {Vector(0, ts*4, 0), 0, 0}, Vector(0, -1, 0))
         },
     }
 })
@@ -218,6 +244,20 @@ for i=0, 15 do
     for j=0, 15 do
         if i == 0 and j == 0 then
             SetMapCell(1+j*4, 1+i*4, 0, test)
+        elseif i == 0 then
+            local rot = 180
+            if j%2 == 1 then
+                rot = 90
+            end
+
+            SetMapCell(1+j*4, 1+i*4, rot, test3)
+        elseif i == 15 then
+            local rot = 0
+            if j%2 == 1 then
+                rot = 270
+            end
+
+            SetMapCell(1+j*4, 1+i*4, rot, test3)
         else
             SetMapCell(1+j*4, 1+i*4, 0, test2)
         end

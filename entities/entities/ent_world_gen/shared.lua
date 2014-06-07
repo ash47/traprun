@@ -20,6 +20,7 @@ function ENT:BuildMap()
                 if cell.trapId ~= nil then
                     -- Grab this trap
                     local trap = GetTrap(cell.trapId)
+                    local rot = cell.rot
 
                     -- Check if it has a mesh
                     if trap and trap.mesh then
@@ -32,27 +33,33 @@ function ENT:BuildMap()
                             if CLIENT then
                                 -- Ensure we have an instance for this mesh
                                 renderMeshes[k] = renderMeshes[k] or {}
-
-                                -- Merge all triangles
-                                for kk, vv in pairs(v) do
-                                    for kkk, vvv in pairs(vv) do
-                                        -- Make a copy of the vertex
-                                        local vert = table.Copy(vvv)
-
-                                        -- Move the position based on the offset
-                                        vert.pos = vert.pos + o
-
-                                        -- Add to our mesh
-                                        table.insert(renderMeshes[k], vert)
-                                    end
-                                end
                             end
 
-                            -- Build physics mesh
+                            -- Build meshes
                             for kk, vv in pairs(v) do
                                 for kkk, vvv in pairs(vv) do
+                                    -- Make a copy of the vertex
+                                    local vert = table.Copy(vvv)
+
+                                    local ang = Angle(0, rot, 0)
+
+                                    -- Apply rotation and offset
+                                    vert.pos = vert.pos:RotateAbout(ang, Vector(trap.xSize/2*tileSize, trap.ySize/2*tileSize, 0)) + o
+
+                                    -- If it has a normal, rotate it
+                                    if vert.normal then
+                                        local newNorm = Vector(vert.normal.x, vert.normal.y, vert.normal.z)
+                                        newNorm:Rotate(ang)
+                                        vert.normal = newNorm
+                                    end
+
+                                    -- Add to our renderable mesh
+                                    if CLIENT then
+                                        table.insert(renderMeshes[k], vert)
+                                    end
+
                                     -- Add to our physics mesh
-                                    table.insert(self.physicsMesh, { pos = vvv.pos + o })
+                                    table.insert(self.physicsMesh, vert)
                                 end
                             end
 
