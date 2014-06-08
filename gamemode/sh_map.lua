@@ -2,9 +2,16 @@ AddCSLuaFile()
 
 -- Map settings
 local mapSettings = {
+    -- Size of each tile
     tileSize = 64,
+
+    -- Number of tiles in each direction
     xTiles = 16 * 4,
-    yTiles = 16 * 4
+    yTiles = 16 * 4,
+
+    -- Number of physics handlers in each direction
+    xPhys = 1,
+    yPhys = 1
 }
 
 -- Contains info on where traps are currently
@@ -28,6 +35,14 @@ end
 
 function GetyTiles()
     return mapSettings.yTiles
+end
+
+function GetxPhys()
+    return mapSettings.xPhys
+end
+
+function GetyPhys()
+    return mapSettings.yPhys
 end
 
 function ValidRot(rot)
@@ -93,6 +108,171 @@ function GetMapCell(x, y)
         trapId = map[x][y].trapId,
         rot = map[x][y].rot
     }
+end
+
+-- Will store our physics handlers
+local physCols = {}
+
+function StorePhysCol(xx, yy, ent)
+    physCols[xx.."_"..yy] = ent
+end
+
+local worldGen
+function StoreWorldGen(ent)
+    worldGen = ent
+end
+
+-- Finds and updates a physics collision handler
+function UpdatePhysicsCol(xx, yy, mesh)
+    local col = physCols[xx.."_"..yy]
+    if not IsValid(col) then
+        print("Failed to find physics collision handler for ("..xx..", "..yy..")")
+        return
+    end
+
+    -- Update the phys mesh
+    col:ApplyMesh(mesh)
+end
+
+function SendMapEnts(ply)
+    if SERVER then
+        -- Send list of entities
+        net.Start("mapEnts")
+        net.WriteEntity(worldGen)
+        for xx=1,GetxPhys() do
+            for yy=1,GetyPhys() do
+                net.WriteEntity(physCols[xx.."_"..yy])
+            end
+        end
+        net.Send(ply)
+
+        -- TEMP:
+        UpdateMapFor(ply)
+    else
+        -- Ask for list of entities
+        net.Start("mapEnts")
+        net.SendToServer()
+    end
+end
+
+function UpdateMapFor(ply)
+    net.Start("buildMap")
+    net.Send(ply)
+end
+
+function BuildMap()
+    -- Will store our renderable meshes
+    local renderMeshes = {}
+
+    -- Reset out physics mesh
+    --local physicsMesh = {}
+    local physMeshes = {}
+
+    local tileSize = GetTileSize()
+
+    local xTiles = GetxTiles()
+    local yTiles = GetyTiles()
+
+    local xPhys = GetxPhys()
+    local yPhys = GetyPhys()
+
+    local xPhysi = xTiles/xPhys
+    local yPhysi = yTiles/yPhys
+
+    for xx=1,xTiles do
+        for yy=1,yTiles do
+            -- Grab a cell
+            local cell = GetMapCell(xx, yy)
+            if cell then
+                -- Check if it has a trap in it
+                if cell.trapId ~= nil then
+                    -- Grab this trap
+                    local trap = GetTrap(cell.trapId)
+                    local rot = cell.rot
+
+                    -- Check if it has a mesh
+                    if trap and trap.mesh then
+                        -- Find which physics cell to place this into
+                        local physX = math.ceil(xx/xPhysi)
+                        local physY = math.ceil(yy/yPhysi)
+                        local physName = physX.."_"..physY
+
+                        -- Ensure the table exists
+                        physMeshes[physName] = physMeshes[physName] or {}
+
+                        -- Loop over all sections of this mesh
+                        for k,v in pairs(trap.mesh) do
+                            -- Workout the offsets
+                            local o = Vector((xx-1)*tileSize, (yy-1)*tileSize, 0)
+
+                            -- Build rendereable mesh
+                            if CLIENT then
+                                -- Ensure we have an instance for this mesh
+                                renderMeshes[k] = renderMeshes[k] or {}
+                            end
+
+                            -- Build meshes
+                            for kk, vv in pairs(v) do
+                                for kkk, vvv in pairs(vv) do
+                                    -- Make a copy of the vertex
+                                    local vert = table.Copy(vvv)
+
+                                    local ang = Angle(0, rot, 0)
+
+                                    -- Apply rotation and offset
+                                    vert.pos = vert.pos:RotateAbout(ang, Vector(trap.xSize/2*tileSize, trap.ySize/2*tileSize, 0)) + o
+
+                                    -- If it has a normal, rotate it
+                                    if vert.normal then
+                                        local newNorm = Vector(vert.normal.x, vert.normal.y, vert.normal.z)
+                                        newNorm:Rotate(ang)
+                                        vert.normal = newNorm
+                                    end
+
+                                    -- Add to our renderable mesh
+                                    if CLIENT then
+                                        table.insert(renderMeshes[k], vert)
+                                    end
+
+                                    -- Check if we need physics on this part of the trap
+                                    if not trap.nophysics or not trap.nophysics[k] then
+                                        -- Add to our physics mesh
+                                        table.insert(physMeshes[physName], vert)
+                                    end
+                                end
+                            end
+
+                            -- Remove duplicate triangles from physics mesh
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Build the renderable meshes
+    if CLIENT then
+        -- Reset our rendereables
+        local rm = {}
+
+        for k,v in pairs(renderMeshes) do
+            -- Create the meshes
+            rm[k] = Mesh()
+            rm[k]:BuildFromTriangles(v)
+        end
+
+        -- Apply it to the renderer
+        if IsValid(worldGen) then
+            worldGen:UpdateMeshes(rm)
+        end
+    end
+
+    -- Update collisions
+    for xx=1,xPhys do
+        for yy=1,yPhys do
+            UpdatePhysicsCol(xx, yy, physMeshes[xx.."_"..yy])
+        end
+    end
 end
 
 -- Contains all of our trap info

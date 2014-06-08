@@ -4,18 +4,20 @@ function ENT:Initialize()
     -- This will house all the meshes we need to render
     self.renderMeshes = {}
 
-    -- Build the map
-    self:BuildMap()
-
     local xTiles = GetxTiles()
     local yTiles = GetyTiles()
     local tileSize = GetTileSize()
 
     -- Make it visible
     self:SetRenderBounds(Vector(0, 0, -4*tileSize), Vector(xTiles*tileSize, yTiles*tileSize, 4*tileSize))
+
+    -- Stop movement
+    self:SetMoveType(MOVETYPE_NONE)
 end
 
-local meshMaterial = Material("staircase/tester1")
+function ENT:UpdateMeshes(meshes)
+    self.renderMeshes = meshes
+end
 
 local mats = {
     --def = Material("models/props_wasteland/wood_fence01a"),

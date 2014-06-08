@@ -1,6 +1,9 @@
 function GM:PlayerInitialSpawn(ply)
     -- Disable flashlight
     ply:AllowFlashlight(true)
+
+    -- Set Model
+    ply:SetModel("models/player/Group01/male_03.mdl")
 end
 
 function GM:PlayerSpawn(ply)
