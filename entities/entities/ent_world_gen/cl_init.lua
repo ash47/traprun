@@ -28,7 +28,9 @@ local mats = {
 }
 
 function ENT:Draw()
+    render.SetBlend(0)
     self:DrawModel()
+    render.SetBlend(1)
 
     local matrix = Matrix()
     matrix:Translate(self:GetPos())
