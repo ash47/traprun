@@ -12,6 +12,25 @@ function GM:InitPostEntity()
     worldGen:SetPos(spawnPos)
     worldGen:Spawn()
 
+    -- Get info needed to generate death zone
+    local ts = GetTileSize()
+    local xTiles = GetxTiles()
+    local yTiles = GetyTiles()
+
+
+    -- Add the death zone to the bottom of the map
+    local deathZone = ents.Create("ent_generic_trigger")
+    deathZone:SetPos(spawnPos)
+    deathZone:Spawn()
+    deathZone:SetBounds(Vector(0, 0, -4*ts), Vector(xTiles*ts, yTiles*ts, -3*ts))
+
+    -- Make it kill players
+    function deathZone:Touch(ent)
+        if IsValid(ent) and ent:IsPlayer() then
+            ent:Kill()
+        end
+    end
+
     -- Spawn long corridor
     --[[for i=0,15 do
         for j=0,15 do

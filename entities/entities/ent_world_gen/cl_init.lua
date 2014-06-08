@@ -19,9 +19,10 @@ local meshMaterial = Material("staircase/tester1")
 
 local mats = {
     --def = Material("models/props_wasteland/wood_fence01a"),
-    def = Material("staircase/tester1"),
-    floor = Material("staircase/tester2"),
-    roof = Material("staircase/tester3")
+    def = Material("traprun/wall"),
+    floor = Material("traprun/floor"),
+    roof = Material("traprun/roof"),
+    spike = Material("traprun/spike")
 }
 
 function ENT:Draw()

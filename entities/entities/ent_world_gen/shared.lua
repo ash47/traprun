@@ -58,13 +58,15 @@ function ENT:BuildMap()
                                         table.insert(renderMeshes[k], vert)
                                     end
 
-                                    -- Add to our physics mesh
-                                    table.insert(self.physicsMesh, vert)
+                                    -- Check if we need physics on this part of the trap
+                                    if not trap.nophysics or not trap.nophysics[k] then
+                                        -- Add to our physics mesh
+                                        table.insert(self.physicsMesh, vert)
+                                    end
                                 end
                             end
 
                             -- Remove duplicate triangles from physics mesh
-
                         end
                     end
                 end

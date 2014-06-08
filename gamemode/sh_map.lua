@@ -136,8 +136,6 @@ end
 
 -- Creates a plane
 function Plane(top_left, top_right, bottom_right, bottom_left, normal)
-    -- Fix tex coords
-
     return {
         Vertex(bottom_right[1], bottom_right[2], bottom_right[3], normal),
         Vertex(top_right[1], top_right[2], top_right[3], normal),
@@ -146,6 +144,35 @@ function Plane(top_left, top_right, bottom_right, bottom_left, normal)
         Vertex(top_right[1], top_right[2], top_right[3], normal),
         Vertex(top_left[1], top_left[2], top_left[3], normal),
         Vertex(bottom_left[1], bottom_left[2], bottom_left[3], normal)
+    }
+end
+
+-- Creates a spike
+function Spike(pos, radius, height)
+    -- Calculate the corners
+    local front = pos + Vector(0, -radius, 0)
+    local back  = pos + Vector(0, radius, 0)
+    local left  = pos + Vector(-radius, 0, 0)
+    local right = pos + Vector(radius, 0, 0)
+    local top   = pos + Vector(0, 0, height)
+
+    -- Return a spike
+    return {
+        Vertex(front, 0, 0, Vector(0, 0, 1)),
+        Vertex(left, 1, 0, Vector(0, 0, 1)),
+        Vertex(top, 0.5, 1, Vector(0, 0, 1)),
+
+        Vertex(left, 0, 0, Vector(0, 0, 1)),
+        Vertex(back, 1, 0, Vector(0, 0, 1)),
+        Vertex(top, 0.5, 1, Vector(0, 0, 1)),
+
+        Vertex(back, 0, 0, Vector(0, 0, 1)),
+        Vertex(right, 1, 0, Vector(0, 0, 1)),
+        Vertex(top, 0.5, 1, Vector(0, 0, 1)),
+
+        Vertex(right, 0, 0, Vector(0, 0, 1)),
+        Vertex(front, 1, 0, Vector(0, 0, 1)),
+        Vertex(top, 0.5, 1, Vector(0, 0, 1)),
     }
 end
 
@@ -210,6 +237,26 @@ local test2 = RegisterTrap({
             -- Back Hole
             Plane({Vector(0, ts, 0), 0, 0}, {Vector(ts*4, ts, 0), 4, 0}, {Vector(ts*4, ts, -ts*4), 4, -4}, {Vector(0, ts, -ts*4), 0, -4}, Vector(0, 1, 0))
         },
+        spike = {
+            -- Middle Row
+            Spike(Vector(ts*0.5, ts*2, -ts*4), ts*0.25, ts),
+            Spike(Vector(ts*1.5, ts*2, -ts*4), ts*0.25, ts),
+            Spike(Vector(ts*2.5, ts*2, -ts*4), ts*0.25, ts),
+            Spike(Vector(ts*3.5, ts*2, -ts*4), ts*0.25, ts),
+
+            -- Top Row
+            Spike(Vector(ts*1, ts*2.5, -ts*4), ts*0.25, ts),
+            Spike(Vector(ts*2, ts*2.5, -ts*4), ts*0.25, ts),
+            Spike(Vector(ts*3, ts*2.5, -ts*4), ts*0.25, ts),
+
+            -- Bottom Row
+            Spike(Vector(ts*1, ts*1.5, -ts*4), ts*0.25, ts),
+            Spike(Vector(ts*2, ts*1.5, -ts*4), ts*0.25, ts),
+            Spike(Vector(ts*3, ts*1.5, -ts*4), ts*0.25, ts),
+        }
+    },
+    nophysics = {
+        spike = true
     }
 })
 
